@@ -55,6 +55,6 @@ kubectl apply -f deployment.yaml
 
 kubectl port-forward -n go-blob-downloader $(kubectl get pods -n go-blob-downloader -o name --no-headers=true) 8080:8080 &
 
-curl http://127.0.0.1:8080/?bloburl=https://samibeckecus01.blob.core.windows.net/data/file.csv
+curl http://127.0.0.1:8080/?bloburl=https://{storageaccountname}.blob.core.windows.net/data/file.csv
 
 ```
