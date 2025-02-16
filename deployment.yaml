@@ -19,7 +19,7 @@ spec:
         - name:  go-blob-downloader-regcred
       containers:
       - name: go-blob-downloader 
-        image: acromnimbecker.azurecr.io/go-blob-downloader:latest
+        image: {YOURACRNAMEHERE}.azurecr.io/go-blob-downloader:latest
         imagePullPolicy: IfNotPresent
         ports:
           - containerPort: 8080
