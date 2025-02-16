@@ -1,31 +1,16 @@
 package main
 
 import (
-	// "bufio"
-	// "bytes"
 	"context"
 	"fmt"
 	"log"
-	// "os"
 	"net/http"
 	"net/url"
 	"io"
 	"strings"
-
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob"
 )
-
-// Azure Storage Quickstart Sample - Demonstrate how to upload, list, download, and delete blobs.
-//
-// Documentation References:
-// - What is a Storage Account - https://docs.microsoft.com/azure/storage/common/storage-create-storage-account
-// - Blob Service Concepts - https://docs.microsoft.com/rest/api/storageservices/Blob-Service-Concepts
-// - Blob Service Go SDK API - https://godoc.org/github.com/Azure/azure-storage-blob-go
-// - Blob Service REST API - https://docs.microsoft.com/rest/api/storageservices/Blob-Service-REST-API
-// - Scalability and performance targets - https://docs.microsoft.com/azure/storage/common/storage-scalability-targets
-// - Azure Storage Performance and Scalability checklist https://docs.microsoft.com/azure/storage/common/storage-performance-checklist
-// - Storage Emulator - https://docs.microsoft.com/azure/storage/common/storage-use-emulator
 
 func handleError(err error) {
 	if err != nil {
@@ -68,28 +53,24 @@ func downloadBlobHandler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Printf("Handling request url: %s\n", r.URL.String())
 
-	u, err := url.Parse(bloburl)
-	if err != nil {
-		fmt.Printf("Failed to parse URL: %v\n", err)
-		return
-	}
-
-	accountURL, containerName, blobPath, err := extractUrlParts(u.String())
+	accountURL, containerName, blobPath, err := extractUrlParts(bloburl)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
+		http.Error(w, "Server Error", http.StatusInternalServerError)
 		return
 	}
 
-	// Create a DefaultAzureCredential
 	cred, err := azidentity.NewDefaultAzureCredential(nil)
 	if err != nil {
 		fmt.Printf("Failed to create DefaultAzureCredential: %v\n", err)
+		http.Error(w, "Server Error", http.StatusInternalServerError)
 		return
 	}
 
 	blobClient, err := azblob.NewClient(accountURL, cred, nil)
 	if err != nil {
 		fmt.Printf("Failed to create BlobClient: %v\n", err)
+		http.Error(w, "Server Error", http.StatusInternalServerError)
 		return
 	}
 
@@ -114,8 +95,18 @@ func downloadBlobHandler(w http.ResponseWriter, r *http.Request) {
 	handleError(err)
 }
 
+func healthHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+}
+
+func readinessHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+}
+
 func main() {
     http.HandleFunc("/", downloadBlobHandler)
+	http.HandleFunc("/health", healthHandler)
+	http.HandleFunc("/readiness", readinessHandler)
     fmt.Println("Server started at :8080")
     http.ListenAndServe(":8080", nil)
 }

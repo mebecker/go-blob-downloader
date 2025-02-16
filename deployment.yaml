@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment               
+metadata:
+  name: go-blob-downloader
+  namespace: go-blob-downloader
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: go-blob-downloader
+  template:
+    metadata:
+      labels:
+        app: go-blob-downloader  
+        azure.workload.identity/use: "true"
+    spec:          
+      serviceAccountName: go-blob-downloader-sa
+      imagePullSecrets:
+        - name:  go-blob-downloader-regcred
+      containers:
+      - name: go-blob-downloader 
+        image: acromnimbecker.azurecr.io/go-blob-downloader:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+          - containerPort: 8080
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 5
+          periodSeconds: 15
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /readiness
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 5
+          timeoutSeconds: 1    
