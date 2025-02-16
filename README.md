@@ -53,7 +53,8 @@ EOF
 kubectl create secret go-blob-downloader-regcred docker-registry --docker-server=$ACR_NAME.azurecr.io --docker-username=$TOKEN_NAME --docker-password=$ACR_TOKEN --save-config --dry-run=client -o json | kubectl apply -f -
 kubectl apply -f deployment.yaml
 
-# kubectl logs -n go-blob-downloader $(kubectl get pods -n go-blob-downloader -o name --no-headers=true)
+kubectl port-forward -n go-blob-downloader $(kubectl get pods -n go-blob-downloader -o name --no-headers=true) 8080:8080 &
 
-kubectl port-forward -n go-blob-downloader $(kubectl get pods -n go-blob-downloader -o name --no-headers=true) 8080:8080
+curl http://127.0.0.1:8080/?bloburl=https://samibeckecus01.blob.core.windows.net/data/file.csv
+
 ```
